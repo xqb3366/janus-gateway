@@ -70,8 +70,9 @@ int janus_ice_set_turn_server(gchar *turn_server, uint16_t turn_port, gchar *tur
  * @param[in] api_server TURN REST API backend (NULL to disable the API)
  * @param[in] api_key API key to use, if required
  * @param[in] api_method HTTP method to use (POST by default)
+ * @param[in] api_timeout total timeout for HTTP method in seconds
  * @returns 0 in case of success, a negative integer on errors */
-int janus_ice_set_turn_rest_api(gchar *api_server, gchar *api_key, gchar *api_method);
+int janus_ice_set_turn_rest_api(gchar *api_server, gchar *api_key, gchar *api_method, uint api_timeout);
 /*! \brief Method to get the STUN server IP address
  * @returns The currently used STUN server IP address, if available, or NULL if not */
 char *janus_ice_get_stun_server(void);
@@ -128,6 +129,22 @@ gboolean janus_ice_is_mdns_enabled(void);
 /*! \brief Method to check whether IPv6 candidates are enabled/supported or not
  * @returns true if IPv6 candidates are enabled/supported, false otherwise */
 gboolean janus_ice_is_ipv6_enabled(void);
+#ifdef HAVE_ICE_NOMINATION
+/*! \brief Method to configure the ICE nomination mode (regular or aggressive)
+ * @param[in] nomination The ICE nomination mode (regular or aggressive) */
+void janus_ice_set_nomination_mode(const char *nomination);
+/*! \brief Method to return a string description of the configured ICE nomination mode
+ * @returns "regular" or "aggressive" */
+const char *janus_ice_get_nomination_mode(void);
+#endif
+/*! \brief Method to enable/disable connectivity checks as keepalives for PeerConnections.
+ * \note The main rationale behind this setting is provided in the libnice documentation:
+ * https://libnice.freedesktop.org/libnice/NiceAgent.html#NiceAgent--keepalive-conncheck
+ * @param[in] enabled Whether the functionality should be enabled or disabled */
+void janus_ice_set_keepalive_conncheck_enabled(gboolean enabled);
+/*! \brief Method to check whether connectivity checks will be used as keepalives
+ * @returns true if enabled, false (default) otherwise */
+gboolean janus_ice_is_keepalive_conncheck_enabled(void);
 /*! \brief Method to modify the min NACK value (i.e., the minimum time window of packets per handle to store for retransmissions)
  * @param[in] mnq The new min NACK value */
 void janus_set_min_nack_queue(uint16_t mnq);
@@ -139,7 +156,7 @@ uint16_t janus_get_min_nack_queue(void);
  * keyframe, as any missing packet won't be needed since the keyframe will allow the
  * media recipient to still restore a complete image anyway. Since this optimization
  * seems to cause some issues in some edge cases, it's disabled by default.
- * @param[in] optimize Whether the opzimization should be enabled or disabled */
+ * @param[in] optimize Whether the optimization should be enabled or disabled */
 void janus_set_nack_optimizations_enabled(gboolean optimize);
 /*! \brief Method to check whether NACK optimizations on outgoing keyframes are enabled or not
  * @returns optimize if optimizations are enabled, false otherwise */

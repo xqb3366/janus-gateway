@@ -1,7 +1,7 @@
 Janus WebRTC Server
 ===================
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-brightgreen.svg)](COPYING)
-[![Build Status](https://travis-ci.com/meetecho/janus-gateway.svg?branch=master)](https://travis-ci.com/meetecho/janus-gateway)
+![janus-ci](https://github.com/meetecho/janus-gateway/workflows/janus-ci/badge.svg)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/13265/badge.svg)](https://scan.coverity.com/projects/meetecho-janus-gateway)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/janus-gateway.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:janus-gateway)
 
@@ -17,7 +17,7 @@ To install it, you'll need to satisfy the following dependencies:
 
 * [Jansson](http://www.digip.org/jansson/)
 * [libconfig](https://hyperrealm.github.io/libconfig/)
-* [libnice](https://libnice.freedesktop.org/) (at least v0.1.16 suggested, master recommended)
+* [libnice](https://libnice.freedesktop.org/) (at least v0.1.16 suggested, v0.1.18 recommended)
 * [OpenSSL](http://www.openssl.org/) (at least v1.0.1e)
 * [libsrtp](https://github.com/cisco/libsrtp) (at least v2.x suggested)
 * [usrsctp](https://github.com/sctplab/usrsctp) (only needed if you are interested in Data Channels)
@@ -127,7 +127,8 @@ The same applies for libwebsockets, which is needed for the optional WebSockets 
 	mkdir build
 	cd build
 	# See https://github.com/meetecho/janus-gateway/issues/732 re: LWS_MAX_SMP
-	cmake -DLWS_MAX_SMP=1 -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCMAKE_C_FLAGS="-fpic" ..
+	# See https://github.com/meetecho/janus-gateway/issues/2476 re: LWS_WITHOUT_EXTENSIONS
+	cmake -DLWS_MAX_SMP=1 -DLWS_WITHOUT_EXTENSIONS=0 -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCMAKE_C_FLAGS="-fpic" ..
 	make && sudo make install
 
 * *Note:* if libwebsockets.org is unreachable for any reason, replace the first line with this:
@@ -205,6 +206,17 @@ If Doxygen and graphviz are available, the process can also build the documentat
 	./configure --enable-docs
 
 You can also selectively enable/disable other features (e.g., specific plugins you don't care about, or whether or not you want to build the recordings post-processor). Use the --help option when configuring for more info.
+
+### Building on FreeBSD
+* *Note*: rtp_forward of streams only works streaming to IPv6,
+because of #2051 and thus the feature is not supported on FreeBSD at the moment.
+
+When building on FreeBSD you can install the depencencies from ports or packages, here only pkg method is used. You also need to use `gmake` instead of `make`,
+since it is a GNU makefile. `./configure` can be run without arguments since the default prefix is `/usr/local` which is your default `LOCALBASE`.
+Note that the `configure.ac` is coded to use openssl in base. If you wish to use openssl from ports or any other ssl you must change `configure.ac` accordingly.
+
+	pkg install libsrtp2 libusrsctp jansson libnice libmicrohttpd libwebsockets curl opus sofia-sip libogg jansson libnice libconfig \
+        libtool gmake autoconf autoconf-wrapper glib gengetopt
 
 
 ### Building on MacOS
